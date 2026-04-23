@@ -1,0 +1,342 @@
+/* ==========================================================================
+   Restaurant Finder — Nice
+   Layered on top of Pico.css. Minimal, intentional overrides only.
+   Palette & type inspired by Nice: Mediterranean blue, Vieux Nice terracotta,
+   warm parchment. Fraunces for editorial display, Manrope for readable body.
+   ========================================================================== */
+
+:root {
+  /* Nice-inspired palette */
+  --nice-sea:         #1f6f8b;
+  --nice-sea-deep:    #0e4c66;
+  --nice-sea-soft:    #e6f0f4;
+  --nice-terracotta:  #c5603f;
+  --nice-sand:        #faf5ea;
+  --nice-sand-deep:   #efe5cd;
+  --nice-ink:         #1a2230;
+  --nice-muted:       #6b7280;
+
+  /* Override Pico tokens */
+  --pico-font-family-sans-serif: "Manrope", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --pico-font-family-serif:      "Fraunces", Georgia, serif;
+  --pico-font-weight:            400;
+  --pico-line-height:            1.6;
+
+  --pico-primary:                var(--nice-sea);
+  --pico-primary-hover:          var(--nice-sea-deep);
+  --pico-primary-focus:          rgba(31, 111, 139, 0.25);
+  --pico-primary-inverse:        #fff;
+
+  --pico-background-color:       var(--nice-sand);
+  --pico-color:                  var(--nice-ink);
+  --pico-muted-color:            var(--nice-muted);
+  --pico-card-background-color:  #fff;
+  --pico-card-sectioning-background-color: var(--nice-sea-soft);
+
+  --pico-border-radius:          0.5rem;
+  --pico-spacing:                1.1rem;
+}
+
+html, body {
+  background-color: var(--nice-sand);
+}
+
+/* ---------- Header ---------- */
+
+.site-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 2rem 0 0.25rem;
+  border-bottom: 1px solid var(--nice-sand-deep);
+  margin-bottom: 1rem;
+}
+
+.brand {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.brand-mark {
+  font-size: 1.6rem;
+  line-height: 1;
+  color: var(--nice-terracotta);
+  transform: translateY(2px);
+  display: inline-block;
+}
+
+.site-header h1 {
+  font-family: var(--pico-font-family-serif);
+  font-weight: 600;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  letter-spacing: -0.01em;
+  margin: 0;
+  line-height: 1.1;
+}
+
+.lang-btn {
+  font-family: var(--pico-font-family-sans-serif);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.35rem 0.8rem;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.tagline {
+  color: var(--nice-muted);
+  font-style: italic;
+  margin: 0 0 2rem;
+}
+
+/* ---------- Filter controls ---------- */
+
+.controls {
+  background: #fff;
+  padding: 1.1rem 1.25rem;
+  border-radius: var(--pico-border-radius);
+  border: 1px solid var(--nice-sand-deep);
+  margin-bottom: 2rem;
+}
+
+.controls .grid {
+  align-items: end;
+}
+
+.controls label {
+  margin-bottom: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: var(--nice-ink);
+}
+
+.controls select {
+  margin-bottom: 0;
+}
+
+.checkbox-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding-top: 1.5rem;
+}
+
+.checkbox-wrap input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+/* ---------- Status line ---------- */
+
+#status {
+  min-height: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+#status p {
+  margin: 0;
+  color: var(--nice-muted);
+  font-size: 0.9rem;
+}
+
+[aria-busy="true"] {
+  text-align: center;
+  padding: 2rem 0;
+  color: var(--nice-muted);
+}
+
+.error-box {
+  border-left: 3px solid var(--nice-terracotta);
+  background: #fff;
+  padding: 1rem 1.25rem;
+  border-radius: var(--pico-border-radius);
+}
+.error-box p {
+  color: var(--nice-ink);
+  margin-bottom: 0.75rem;
+}
+
+/* ---------- Results list ---------- */
+
+#results {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  #results {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+#results article {
+  margin: 0;
+  background: #fff;
+  border: 1px solid var(--nice-sand-deep);
+  border-radius: var(--pico-border-radius);
+  padding: 1.1rem 1.25rem;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+#results article:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 76, 102, 0.08);
+  border-color: var(--nice-sea);
+}
+
+.card-title {
+  font-family: var(--pico-font-family-serif);
+  font-weight: 600;
+  font-size: 1.15rem;
+  line-height: 1.2;
+  color: var(--nice-ink);
+  margin: 0;
+}
+
+.card-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  font-size: 0.85rem;
+}
+
+.card-cuisine {
+  color: var(--nice-muted);
+}
+
+.card-cuisine em {
+  opacity: 0.7;
+}
+
+.card-address {
+  color: var(--nice-ink);
+  font-size: 0.9rem;
+  margin: 0;
+  line-height: 1.45;
+}
+
+.card-address.muted {
+  color: var(--nice-muted);
+  font-style: italic;
+}
+
+.card-actions {
+  margin-top: auto;
+  padding-top: 0.25rem;
+}
+
+.card-actions button {
+  margin: 0;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  font-weight: 500;
+}
+
+/* Open-status badges */
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.badge-open {
+  background: #e7f5ea;
+  color: #1f6d3a;
+}
+
+.badge-closed {
+  background: #f5e8e4;
+  color: #a03f25;
+}
+
+.badge-unknown {
+  background: var(--nice-sand-deep);
+  color: var(--nice-muted);
+}
+
+/* ---------- Detail dialog ---------- */
+
+#detail-modal article {
+  max-width: 42rem;
+}
+
+.detail-title {
+  font-family: var(--pico-font-family-serif);
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--nice-ink);
+  margin: 0;
+}
+
+#detail-body p {
+  margin: 0.5rem 0;
+  line-height: 1.5;
+}
+
+#detail-body p strong {
+  color: var(--nice-sea-deep);
+  font-weight: 600;
+  min-width: 6rem;
+  display: inline-block;
+}
+
+#detail-body code {
+  word-break: break-all;
+  font-size: 0.8rem;
+  background: var(--nice-sea-soft);
+  color: var(--nice-sea-deep);
+  padding: 0.15rem 0.4rem;
+  border-radius: 0.25rem;
+}
+
+#detail-body a {
+  color: var(--nice-sea);
+  word-break: break-all;
+}
+
+/* ---------- Footer ---------- */
+
+.site-footer {
+  margin: 3rem 0 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--nice-sand-deep);
+  color: var(--nice-muted);
+  text-align: center;
+}
+
+/* ---------- Dark mode ---------- */
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]),
+  [data-theme="dark"] {
+    --nice-sand:        #141a22;
+    --nice-sand-deep:   #1f2732;
+    --nice-ink:         #f4ead5;
+    --nice-muted:       #9aa4b2;
+    --nice-sea-soft:    #1a3240;
+
+    --pico-background-color: var(--nice-sand);
+    --pico-color: var(--nice-ink);
+    --pico-card-background-color: #1f2732;
+  }
+  .controls,
+  .error-box,
+  #results article,
+  #detail-modal article {
+    background: var(--pico-card-background-color);
+  }
+  .badge-open   { background: #173022; color: #7fd9a0; }
+  .badge-closed { background: #3a1e16; color: #e59579; }
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="fr" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Découvrez les restaurants à Nice, France. Filtrez par quartier, cuisine et horaires.">
+  <title>Restaurants à Nice</title>
+
+  <!-- Typography: Fraunces (editorial display) + Manrope (clean body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Pico.css (classless) -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css">
+
+  <!-- Custom overrides -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <main class="container">
+
+    <header class="site-header">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">⛱</span>
+        <h1 id="app-title">Restaurants à Nice</h1>
+      </div>
+      <button id="lang-toggle" class="secondary outline lang-btn" aria-label="Switch language">EN</button>
+    </header>
+
+    <p id="app-tagline" class="tagline">
+      <small data-i18n="app.tagline">Uniquement Nice, France — données OpenStreetMap.</small>
+    </p>
+
+    <section class="controls" aria-label="Filters">
+      <div class="grid">
+        <label>
+          <span data-i18n="label.neighborhood">Quartier</span>
+          <select id="filter-neighborhood"></select>
+        </label>
+        <label>
+          <span data-i18n="label.cuisine">Cuisine</span>
+          <select id="filter-cuisine">
+            <option value="">—</option>
+          </select>
+        </label>
+        <label class="checkbox-wrap">
+          <input type="checkbox" id="filter-open-now" role="switch">
+          <span data-i18n="label.openNow">Ouvert maintenant</span>
+        </label>
+      </div>
+    </section>
+
+    <section id="status" aria-live="polite"></section>
+    <section id="results" aria-label="Results"></section>
+
+    <footer class="site-footer">
+      <small>
+        <span data-i18n="footer.attribution">Données © contributeurs OpenStreetMap — ODbL</span>
+      </small>
+    </footer>
+
+    <dialog id="detail-modal">
+      <article>
+        <header>
+          <button aria-label="Close" rel="prev" id="close-modal"></button>
+          <p id="detail-title" class="detail-title"></p>
+        </header>
+        <div id="detail-body"></div>
+      </article>
+    </dialog>
+
+  </main>
+
+  <!-- opening_hours.js: parses OSM's opening_hours tag -->
+  <script src="https://cdn.jsdelivr.net/npm/opening_hours@3.8.0/build/opening_hours.min.js"></script>
+
+  <!-- Data + app -->
+  <script src="data/neighborhoods.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
