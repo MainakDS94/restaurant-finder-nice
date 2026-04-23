@@ -64,6 +64,7 @@
       'status.empty':           'Aucun restaurant ne correspond à vos critères.',
       'card.noCuisine':         'Cuisine non précisée',
       'card.noAddress':         'Adresse non précisée',
+      'card.searchMaps':        'Rechercher sur Google Maps',
       'card.open':              'Ouvert',
       'card.closed':            'Fermé',
       'card.hoursUnknown':      'Horaires inconnus',
@@ -92,6 +93,7 @@
       'status.empty':           'No restaurants match your filters.',
       'card.noCuisine':         'Cuisine not specified',
       'card.noAddress':         'Address not specified',
+      'card.searchMaps':        'Search on Google Maps',
       'card.open':              'Open',
       'card.closed':            'Closed',
       'card.hoursUnknown':      'Hours unknown',
@@ -255,19 +257,108 @@ out center tags;
 
   /* ----------------------------- Open-now ------------------------------ */
 
-
+  /**
+   * Lightweight OSM opening_hours parser.
+   * Handles the vast majority of real-world values:
+   *   24/7 · Mo-Fr 09:00-18:00 · Mo,We 10:00-14:00;Tu,Th 10:00-20:00
+   *   Mo-Sa 09:00-13:00,14:00-19:00 · PH off · etc.
+   * Returns true (open), false (closed), or null (unparseable).
+   */
   function computeOpenState(hoursStr) {
     if (!hoursStr) return null;
-    const OH = (typeof window !== 'undefined' && window.opening_hours) || null;
-    if (!OH) return null;
-    try {
-      // Pass null nominatim + mode:1 so the constructor doesn't throw
-      // in browser environments that lack geolocation context.
-      const oh = new OH(hoursStr, null, { mode: 1 });
-      return oh.getState(); // true | false
-    } catch (_) {
-      return null; // malformed → treat as unknown
+    const raw = hoursStr.trim();
+    if (!raw) return null;
+
+    // 24/7 shortcut
+    if (/^24\/7$/i.test(raw)) return true;
+
+    const now = new Date();
+    // OSM uses Mo=1..Su=7; JS getDay() returns 0=Sun..6=Sat
+    const jsDay = now.getDay(); // 0=Sun
+    const osmDay = jsDay === 0 ? 7 : jsDay; // 1=Mon..7=Sun
+    const nowMins = now.getHours() * 60 + now.getMinutes();
+
+    const DAY_NAME = { mo:1, tu:2, we:3, th:4, fr:5, sa:6, su:7 };
+
+    /** Expand "Mo-Fr" or "Mo,We,Fr" into a Set of OSM day numbers */
+    function parseDaySpec(spec) {
+      const days = new Set();
+      const parts = spec.toLowerCase().split(',');
+      for (const part of parts) {
+        const range = part.match(/^([a-z]{2})-([a-z]{2})$/);
+        if (range) {
+          const s = DAY_NAME[range[1]], e = DAY_NAME[range[2]];
+          if (s != null && e != null) {
+            if (s <= e) { for (let d = s; d <= e; d++) days.add(d); }
+            else        { for (let d = s; d <= 7; d++) days.add(d);
+                          for (let d = 1; d <= e; d++) days.add(d); }
+          }
+        } else {
+          const single = DAY_NAME[part.trim()];
+          if (single != null) days.add(single);
+        }
+      }
+      return days;
     }
+
+    /** "HH:MM" → minutes since midnight */
+    function toMins(t) {
+      const m = t.match(/^(\d{1,2}):(\d{2})$/);
+      return m ? parseInt(m[1], 10) * 60 + parseInt(m[2], 10) : null;
+    }
+
+    /** Check if nowMins falls in a comma-separated list of HH:MM-HH:MM ranges */
+    function inTimeRanges(rangeStr) {
+      for (const seg of rangeStr.split(',')) {
+        const m = seg.trim().match(/^(\d{1,2}:\d{2})-(\d{1,2}:\d{2})$/);
+        if (!m) continue;
+        const open = toMins(m[1]), close = toMins(m[2]);
+        if (open == null || close == null) continue;
+        if (close > open) {
+          if (nowMins >= open && nowMins < close) return true;
+        } else {
+          // spans midnight
+          if (nowMins >= open || nowMins < close) return true;
+        }
+      }
+      return false;
+    }
+
+    // Split on ";" into rules, evaluate each in order (last match wins)
+    const rules = raw.split(';').map(r => r.trim()).filter(Boolean);
+    let result = null;
+
+    for (const rule of rules) {
+      // Strip inline comments like \"by appointment\"
+      const clean = rule.replace(/"[^"]*"/g, '').trim();
+
+      // "off" rule with no day spec → closed always
+      if (/^off$/i.test(clean)) { result = false; continue; }
+
+      // Match: [day-spec] time-ranges | [day-spec] off | time-ranges
+      // Pattern: optional day-spec, then time ranges or "off"
+      const m = clean.match(
+        /^([A-Za-z]{2}(?:[-,][A-Za-z]{2})*)?\s*([\d:,\s\-]+|off)$/i
+      );
+      if (!m) continue;
+
+      const dayPart  = m[1] ? m[1].trim() : null;
+      const timePart = m[2].trim();
+
+      // Check day match
+      if (dayPart) {
+        const days = parseDaySpec(dayPart);
+        if (!days.has(osmDay)) continue; // rule doesn't apply today
+      }
+
+      if (/^off$/i.test(timePart)) {
+        result = false;
+      } else {
+        result = inTimeRanges(timePart);
+      }
+    }
+
+    return result; // null if nothing matched
   }
 
   /* ----------------------------- Filtering ----------------------------- */
@@ -350,7 +441,7 @@ out center tags;
       ${
         r.address
           ? `<p class="card-address">${escapeHtml(r.address)}</p>`
-          : `<p class="card-address muted">${escapeHtml(t('card.noAddress'))}</p>`
+          : `<p class="card-address muted"><a href="https://www.google.com/maps/search/${encodeURIComponent(r.name + ' Nice France')}" target="_blank" rel="noopener noreferrer">${escapeHtml(t('card.searchMaps'))}</a></p>`
       }
       <div class="card-actions">
         <button class="secondary outline" data-action="details" data-id="${escapeHtml(r.id)}">
