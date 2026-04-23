@@ -255,9 +255,10 @@ out center tags;
 
   /* ----------------------------- Open-now ------------------------------ */
 
-  const OH = (typeof window !== 'undefined' && window.opening_hours) || null;
+
 
   function computeOpenState(hoursStr) {
+    const OH = (typeof window !== 'undefined' && window.opening_hours) || null;
     if (!hoursStr) return null;
     if (!OH) return null;
     try {
