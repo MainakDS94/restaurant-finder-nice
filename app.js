@@ -256,13 +256,14 @@ out center tags;
   /* ----------------------------- Open-now ------------------------------ */
 
 
-
   function computeOpenState(hoursStr) {
-    const OH = (typeof window !== 'undefined' && window.opening_hours) || null;
     if (!hoursStr) return null;
+    const OH = (typeof window !== 'undefined' && window.opening_hours) || null;
     if (!OH) return null;
     try {
-      const oh = new OH(hoursStr);
+      // Pass null nominatim + mode:1 so the constructor doesn't throw
+      // in browser environments that lack geolocation context.
+      const oh = new OH(hoursStr, null, { mode: 1 });
       return oh.getState(); // true | false
     } catch (_) {
       return null; // malformed → treat as unknown
